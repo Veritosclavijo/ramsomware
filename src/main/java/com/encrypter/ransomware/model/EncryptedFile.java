@@ -24,5 +24,7 @@ public class EncryptedFile {
     @JoinColumn(name = "idAttack")
     private Encryptor encryptor;
 
+    private String encryptionKey;
+
 
 }
