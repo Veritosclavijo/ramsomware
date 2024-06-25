@@ -17,6 +17,5 @@ public class Encryptor {
     private Integer idAttack;
 
     private String algorithmType;
-    private String encryption_key;
 
 }

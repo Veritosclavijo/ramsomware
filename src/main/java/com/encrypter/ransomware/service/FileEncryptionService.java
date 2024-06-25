@@ -10,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.ECField;
@@ -30,6 +31,10 @@ public class FileEncryptionService {
     public String encryptFile(MultipartFile multipartFile, SecretKey key) throws IOException {
         byte[] fileBytes = multipartFile.getBytes();
         byte[] encryptedBytes = encrypt(fileBytes, key);
+
+        byte[] fileBytesCopy = multipartFile.getBytes();
+        Path backupPath = Paths.get("C:\\Users\\HP\\Desktop\\PruebaEncrypt\\", "Copia_" + multipartFile.getOriginalFilename());
+        Files.write(backupPath, fileBytesCopy);
 
         String filePath = Paths.get("C:\\Users\\HP\\Desktop\\PruebaEncrypt\\", multipartFile.getOriginalFilename()).toString();
         try (FileOutputStream fos = new FileOutputStream(filePath)){

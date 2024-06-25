@@ -3,6 +3,8 @@ package com.encrypter.ransomware.controller;
 import com.encrypter.ransomware.model.EncryptedFile;
 import com.encrypter.ransomware.model.Encryptor;
 import com.encrypter.ransomware.model.File;
+import com.encrypter.ransomware.repository.EncryptedFileRepository;
+import com.encrypter.ransomware.repository.EncryptorRepository;
 import com.encrypter.ransomware.repository.FileRepository;
 import com.encrypter.ransomware.service.FileEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,10 @@ public class FileEncryptController {
 
     @Autowired
     private FileRepository fileRepository;
+    @Autowired
+    private EncryptorRepository encryptorRepository;
+    @Autowired
+    private EncryptedFileRepository encryptedFileRepository;
 
     @PostMapping("/encrypt")
     public String encryptFile(@RequestParam("file") MultipartFile multipartFile) {
@@ -39,12 +45,13 @@ public class FileEncryptController {
 
             Encryptor encryptor = new Encryptor();
             encryptor.setAlgorithmType("AES");
-            encryptor.setEncryption_key(keyEncrypt);
+            encryptorRepository.save(encryptor);
 
             EncryptedFile encryptedFile = new EncryptedFile();
             encryptedFile.setFile(file);
             encryptedFile.setEncryptor(encryptor);
             encryptedFile.setEncryptionKey(keyEncrypt);
+            encryptedFileRepository.save(encryptedFile);
 
             return keyEncrypt;
         } catch (IOException | NoSuchAlgorithmException e){
