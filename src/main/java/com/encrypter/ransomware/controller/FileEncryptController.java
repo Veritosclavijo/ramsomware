@@ -1,11 +1,7 @@
 package com.encrypter.ransomware.controller;
 
-import com.encrypter.ransomware.model.EncryptedFile;
-import com.encrypter.ransomware.model.Encryptor;
-import com.encrypter.ransomware.model.File;
-import com.encrypter.ransomware.repository.EncryptedFileRepository;
-import com.encrypter.ransomware.repository.EncryptorRepository;
-import com.encrypter.ransomware.repository.FileRepository;
+import com.encrypter.ransomware.model.*;
+import com.encrypter.ransomware.repository.*;
 import com.encrypter.ransomware.service.FileEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/filesEncrypt")
@@ -32,28 +29,48 @@ public class FileEncryptController {
     @Autowired
     private EncryptedFileRepository encryptedFileRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserFileRepository userFileRepository;
+
     @PostMapping("/encrypt")
-    public String encryptFile(@RequestParam("file") MultipartFile multipartFile) {
+    public String encryptFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("idUser") Integer idUser) {
         try {
 
-            String keyEncrypt = fileEncryptionService.encryptFile(multipartFile, fileEncryptionService.generateKey());
+            Optional<User> user = userRepository.findById(idUser);
 
-            File file = new File();
-            file.setFileName(multipartFile.getOriginalFilename());
-            file.setEncryptionDate(new Date());
-            fileRepository.save(file);
+            if (user.isPresent()) {
 
-            Encryptor encryptor = new Encryptor();
-            encryptor.setAlgorithmType("AES");
-            encryptorRepository.save(encryptor);
+                String keyEncrypt = fileEncryptionService.encryptFile(multipartFile, fileEncryptionService.generateKey());
 
-            EncryptedFile encryptedFile = new EncryptedFile();
-            encryptedFile.setFile(file);
-            encryptedFile.setEncryptor(encryptor);
-            encryptedFile.setEncryptionKey(keyEncrypt);
-            encryptedFileRepository.save(encryptedFile);
+                File file = new File();
+                file.setFileName(multipartFile.getOriginalFilename());
+                file.setEncryptionDate(new Date());
+                fileRepository.save(file);
 
-            return keyEncrypt;
+                Encryptor encryptor = new Encryptor();
+                encryptor.setAlgorithmType("AES");
+                encryptorRepository.save(encryptor);
+
+                EncryptedFile encryptedFile = new EncryptedFile();
+                encryptedFile.setFile(file);
+                encryptedFile.setEncryptor(encryptor);
+                encryptedFile.setEncryptionKey(keyEncrypt);
+                encryptedFileRepository.save(encryptedFile);
+
+                UserFile userFile = new UserFile();
+                userFile.setFile(file);
+                userFile.setUser(user.get());
+
+                userFileRepository.save(userFile);
+
+                return keyEncrypt;
+            }
+            else {
+                return "El usuario con el id: " + idUser + " no existe";
+            }
         } catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
             return "Error encriptando"+e;
