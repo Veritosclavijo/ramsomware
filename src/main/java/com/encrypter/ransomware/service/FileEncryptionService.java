@@ -16,32 +16,34 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.ECField;
 import java.util.Base64;
 
-@Service
+@Service // Para indicar que esta clase va a ser el servicio
 public class FileEncryptionService {
 
     private static final String ALGORITHM = "AES";
     private static final String KEY_ALGORITHM = "AES";
 
+
+// Creación de llave
     public SecretKey generateKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
         keyGenerator.init(256);
-        return keyGenerator.generateKey();
+        return keyGenerator.generateKey(); // genera y devuelve la clave
     }
-
+    //Encriptación de archivo
     public String encryptFile(MultipartFile multipartFile, SecretKey key) throws IOException {
         byte[] fileBytes = multipartFile.getBytes();
-        byte[] encryptedBytes = encrypt(fileBytes, key);
+        byte[] encryptedBytes = encrypt(fileBytes, key); // Encriptando bytes
 
         byte[] fileBytesCopy = multipartFile.getBytes();
         Path backupPath = Paths.get("C:\\Users\\HP\\Desktop\\PruebaEncrypt\\", "Copia_" + multipartFile.getOriginalFilename());
-        Files.write(backupPath, fileBytesCopy);
+        Files.write(backupPath, fileBytesCopy); // copia del archivo
 
         String filePath = Paths.get("C:\\Users\\HP\\Desktop\\PruebaEncrypt\\", multipartFile.getOriginalFilename()).toString();
         try (FileOutputStream fos = new FileOutputStream(filePath)){
-            fos.write(encryptedBytes);
+            fos.write(encryptedBytes); // construir el archivo con los bites encriptados
         }
 
-        return Base64.getEncoder().encodeToString(key.getEncoded());
+        return Base64.getEncoder().encodeToString(key.getEncoded()); // metodo para obtener llave para mostrarla en string
     }
 
     public void decryptFile(MultipartFile multipartFile, String encodedKey) throws IOException {
@@ -55,7 +57,7 @@ public class FileEncryptionService {
             fos.write(decryptedBytes);
         }
     }
-
+// metodo para encriptar
     private byte[] encrypt(byte[] data, SecretKey key){
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -65,7 +67,7 @@ public class FileEncryptionService {
             throw new RuntimeException("Error encriptando archivo",e);
         }
     }
-
+// metodo para desencriptar
     private byte[] decrypt(byte[] data, SecretKey key){
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);

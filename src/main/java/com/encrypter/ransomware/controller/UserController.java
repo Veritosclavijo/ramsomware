@@ -7,20 +7,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("api/users")
+@RestController // Es el controlador
+@RequestMapping("api/users") // CREAR EL CONTEXTO DEL ENDPOINT (http://localhost:8080/api/users) para comunicarse el front con el back
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired  // Inyeccion de dependencias
+    private UserRepository userRepository; // instanciacion del userrepository
 
-    @GetMapping
-    public List<User> getAllUsers() {
+    @GetMapping // traer informacion de bases de datos
+    public List<User> getAllUsers() { // SE CREA EL METODO PARA LLAMAR EL METODO FINDALL
+
         return userRepository.findAll();
+
     }
 
-    @PostMapping
+    @PostMapping // guardar informacion
     public User createUser(@RequestBody User user){
+
         return userRepository.save(user);
     }
 
